@@ -48,4 +48,4 @@ def decryption(block_msg, key, type, iv):
     if type == "OFB":
         var = aes.decrypt(iv)
         dec = xor_function(var, block_msg)
-    return {'c': dec, 'iv': dec}
+    return {'ft': dec, 'iv': dec}

@@ -4,7 +4,7 @@ import socket
 import helpencrypt
 
 host = "localhost"
-port = 9008
+port = 9009
 file = open('input.txt', 'rb')
 text = file.read()
 mod_crypt = ["CBC", "OFB"]
@@ -14,7 +14,7 @@ iv = b'abcdefghijklmnop'
 def KM_key():
     # connect to km
     skm = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    skm.connect((host, 9003))
+    skm.connect((host, 9004))
     # send mode to km
     skm.sendall(choose_mod.encode())
     # recv the key from km
@@ -27,10 +27,6 @@ def KM_key():
 if __name__ == '__main__':
     choose_mod = input("Alegeti un tip de criptare(CBC sau OFB): ")
     k1 = KM_key()
-    # print("cheie primita:")
-    # print(k1)
-    # k1 = helpencrypt.aeskey(key).decrypt(k1)
-    # print(k1)
     # send message to B
     sb = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sb.connect((host, port))
@@ -49,6 +45,8 @@ if __name__ == '__main__':
             print(block)
             encrtext = helpencrypt.encryption(block, k1, choose_mod, iv)
             sb.sendall(encrtext['c'])
+            print(encrtext['c'])
+            iv=encrtext['iv']
             i = i+16
     finally:
         sb.close()
