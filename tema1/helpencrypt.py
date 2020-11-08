@@ -5,11 +5,11 @@ import binascii
 iv = b'nu stiu ce contine'
 
 def aeskey(kknown):
-    var = AES.new(kknown, AES.MODE_ECB)
+    var = AES.new(kknown, AES.MODE_CBC)
     return var
 
 def key_generator():
-    return Random.get_random_bytes(128)
+    return Random.get_random_bytes(16)
 
 def xor_function(a,b):
     var = binascii.hexlify(a)
@@ -30,15 +30,22 @@ def xor_function(a,b):
 #     return msg
 
 def encryption(block_msg, key, type, iv):
-   aes = aeskey(key)
-   if type == "CBC":
+    aes = aeskey(key)
+    if type == "CBC":
        var = xor_function(block_msg, iv)
        en = aes.encrypt(var)
-   return {'c': en, 'iv': en}
+    if type == "OFB":
+        var= aes.encrypt(iv)
+        en = xor_function(block_msg, var)
+    return {'c': en, 'iv': en}
 
 def decryption(block_msg, key, type, iv):
     aes = aeskey(key)
     if type == "CBC":
         var = aes.decrypt(block_msg)
         dec = xor_function(var, iv)
+        
+    if type == "OFB":
+        var = aes.decrypt(iv)
+        dec = xor_function(var, block_msg)
     return {'c': dec, 'iv': dec}

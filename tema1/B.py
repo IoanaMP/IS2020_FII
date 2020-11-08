@@ -3,8 +3,8 @@ import socket
 import helpencrypt
 
 host ='localhost'
-port = 9006
-key = "0123456789012345"
+port = 9008
+key = b'0123456789012345'
 iv = b'abcdefghijklmnop'
 
 if __name__=='__main__':

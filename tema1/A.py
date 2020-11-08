@@ -4,34 +4,33 @@ import socket
 import helpencrypt
 
 host = "localhost"
-port = 9006
+port = 9008
 file = open('input.txt', 'rb')
 text = file.read()
 mod_crypt = ["CBC", "OFB"]
-key = "0123456789012345"
+key = b'0123456789012345'
 iv = b'abcdefghijklmnop'
+
+def KM_key():
+    # connect to km
+    skm = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    skm.connect((host, 9003))
+    # send mode to km
+    skm.sendall(choose_mod.encode())
+    # recv the key from km
+    kmsg = skm.recv(16)
+    print("kmsg in f")
+    print(kmsg)
+    skm.close()
+    return kmsg
 
 if __name__ == '__main__':
     choose_mod = input("Alegeti un tip de criptare(CBC sau OFB): ")
-
-    # send message to KM
-    skm = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    skm.connect((host, 9002))
-    try:
-        # send mode to km
-        skm.sendall(choose_mod.encode())
-        # recv the key from k
-        kmsg = skm.recv(16)
-        while kmsg:
-            print("msg" + kmsg.decode())
-            kmsg = skm.recv(16)
-        #decrypt key
-        k1 = helpencrypt.aeskey(key).decrypt(kmsg)
-        print("key from km", k1)
-    finally:
-        skm.close
-    
-
+    k1 = KM_key()
+    # print("cheie primita:")
+    # print(k1)
+    # k1 = helpencrypt.aeskey(key).decrypt(k1)
+    # print(k1)
     # send message to B
     sb = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sb.connect((host, port))
@@ -42,11 +41,13 @@ if __name__ == '__main__':
             raise Exception("B nu incepe conexiunea")
         print("Message from B:", msg)
         sb.sendall(k1)
+        #decrypt key
+        k1 = helpencrypt.aeskey(key).decrypt(k1)
         i=0
         while i <= len(text)-16:
             block = text[i:i+16]
             print(block)
-            encrtext = helpencrypt.encryption(block, choose_mod, k1, iv)
+            encrtext = helpencrypt.encryption(block, k1, choose_mod, iv)
             sb.sendall(encrtext['c'])
             i = i+16
     finally:
